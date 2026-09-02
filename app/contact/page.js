@@ -1,0 +1,6 @@
+import Header from "../ui/Header";
+import Link from "next/link";
+export default function Page() {
+ return <><Header/><main className="subPage"><div className="subHero"><span className="sectionTag">NEXORA</span><h1>Parlons de votre projet.</h1><p className="lead">Une question, une idée ou un projet à construire ? Choisis le moyen qui te convient.</p>
+<div className="contactGrid"><form className="contactForm"><label>Nom / Pseudo<input placeholder="Votre nom"/></label><label>Adresse e-mail<input type="email" placeholder="vous@exemple.fr"/></label><label>Votre message<textarea placeholder="Expliquez-nous votre projet..." rows="6"/></label><button type="button">Envoyer la demande →</button></form><div className="contactSide"><div><span className="sectionTag">CONTACT</span><h2>Une équipe à votre écoute.</h2><p>Le chat en ligne et les coordonnées professionnelles seront intégrés dans la prochaine version.</p></div><div className="contactBox"><b>E-mail professionnel</b><span>contact@nexora.fr</span></div><div className="contactBox"><b>Téléphone</b><span>Disponible prochainement</span></div></div></div></div></main><footer><div className="brand"><span className="brandMark">N</span><span>NEXORA</span></div><p>© 2026 Nexora. Tous droits réservés.</p></footer></>;
+}
