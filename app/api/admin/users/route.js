@@ -1,0 +1,4 @@
+import { NextResponse } from "next/server";
+import { createClient } from "../../../../lib/supabase/server";
+async function admin(){const supabase=await createClient();const {data:c}=await supabase.auth.getClaims();if(!c?.claims)return {response:NextResponse.json({error:"Non authentifié"},{status:401})};const {data:a}=await supabase.from("admin_users").select("user_id").eq("user_id",c.claims.sub).maybeSingle();if(!a)return {response:NextResponse.json({error:"Accès administrateur refusé"},{status:403})};return {supabase};}
+export async function GET(){const {supabase,response}=await admin();if(response)return response;const {data,error}=await supabase.from("profiles").select("user_id,email,full_name,provider,created_at,updated_at").order("created_at",{ascending:false});if(error)return NextResponse.json({error:error.message},{status:500});return NextResponse.json({users:data||[]});}
