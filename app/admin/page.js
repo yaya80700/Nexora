@@ -1,0 +1,42 @@
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Pencil, Trash2, Save, ShieldCheck, LogOut, GraduationCap, Wrench, Globe2, X, Upload, LoaderCircle } from "lucide-react";
+import { createClient } from "../../lib/supabase/client";
+import Link from "next/link";
+import Editor from "./editor/page";
+
+const empty={type:"formation",slug:"",title:"",name:"",full_name:"",category:"",level:"",icon:"✨",description:"",bullets:[],price:"",price_label:"",status:"",accent:"",url:"",image_url:"",active:true,sort_order:0};
+const labels={formation:"Formations",service:"Services",site:"Sites"};
+export default function Admin(){
+ const [items,setItems]=useState([]); const [tab,setTab]=useState("formation"); const [panel,setPanel]=useState("catalog"); const [editing,setEditing]=useState(null); const [form,setForm]=useState(empty); const [error,setError]=useState(""); const [loading,setLoading]=useState(true);
+ async function load(){setLoading(true);setError(""); const r=await fetch("/api/admin/catalog"); const j=await r.json(); if(!r.ok){setError(j.error||"Erreur");}else setItems(j.items||[]); setLoading(false);}
+ useEffect(()=>{load()},[]);
+ const visible=useMemo(()=>items.filter(x=>x.type===tab),[items,tab]);
+ function edit(item){setEditing(item.id);setForm({...empty,...item,bullets:Array.isArray(item.bullets)?item.bullets:[]}); window.scrollTo({top:0,behavior:"smooth"});}
+ function add(){setEditing(null);setForm({...empty,type:tab,sort_order:visible.length+1});window.scrollTo({top:0,behavior:"smooth"});}
+ async function save(e){e.preventDefault();setError("");const method=editing?"PATCH":"POST";const payload=editing?{...form,id:editing}:form;const r=await fetch("/api/admin/catalog",{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const j=await r.json();if(!r.ok){setError(j.error||"Impossible d'enregistrer");return;}setEditing(null);setForm(empty);load();}
+ async function remove(id){if(!confirm("Supprimer définitivement cet élément ?"))return;const r=await fetch("/api/admin/catalog",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});const j=await r.json();if(!r.ok)setError(j.error||"Erreur");else load();}
+ async function logout(){await createClient().auth.signOut();location.href="/admin/connexion"}
+ return <main className="adminPage"><header className="adminTop"><div><span className="sectionTag">NEXORA ADMIN</span><h1>Panneau de <span>contrôle.</span></h1><p>Gérez tout votre site depuis un seul espace.</p></div><div className="adminActions"><Link href="/" className="secondary">Voir le site</Link><button className="secondary" onClick={logout}><LogOut size={15}/> Déconnexion</button></div></header>
+ <section className="adminWrap">
+  <nav className="controlPanelNav" aria-label="Sections du panneau"><button className={panel==="catalog"?"active":""} onClick={()=>setPanel("catalog")}>📦 Catalogue</button><button className={panel==="editor"?"active":""} onClick={()=>setPanel("editor")}>🎨 Éditeur du site</button><Link href="/admin/users">👥 Utilisateurs & Staff</Link><Link href="/admin/demandes">💬 Demandes clients</Link></nav>
+  {panel==="editor"?<Editor embedded />:<>
+  <div className="adminTabs">{[["formation",GraduationCap],["service",Wrench],["site",Globe2]].map(([key,Icon])=><button key={key} className={tab===key?"active":""} onClick={()=>{setTab(key);setEditing(null);setForm({...empty,type:key})}}><Icon size={16}/>{labels[key]}</button>)}</div>
+  <div className="adminHeader"><div><ShieldCheck size={17}/><strong>{labels[tab]}</strong><span>{visible.length} élément(s)</span></div><button className="primary" onClick={add}><Plus size={16}/> Ajouter</button></div>
+  {(editing!==null || (form.type===tab && form.slug && !editing)) && <form className="adminForm" onSubmit={save}><div className="adminFormTitle"><strong>{editing?"Modifier":"Ajouter"} — {labels[tab]}</strong><button type="button" onClick={()=>{setEditing(null);setForm(empty)}}><X size={17}/></button></div>
+   <div className="adminFields"><label>Slug<input value={form.slug||""} onChange={e=>setForm({...form,slug:e.target.value})} required/></label><label>{tab==="site"?"Nom":"Titre"}<input value={(tab==="site"?form.name:form.title)||""} onChange={e=>setForm({...form,[tab==="site"?"name":"title"]:e.target.value})} required/></label><label>Icône<input value={form.icon||""} onChange={e=>setForm({...form,icon:e.target.value})}/></label><label>Ordre<input type="number" value={form.sort_order??0} onChange={e=>setForm({...form,sort_order:e.target.value})}/></label>
+   {tab==="formation"&&<><label>Catégorie<input value={form.category||""} onChange={e=>setForm({...form,category:e.target.value})}/></label><label>Niveau<input value={form.level||""} onChange={e=>setForm({...form,level:e.target.value})}/></label><label>Prix (€)<input type="number" step="0.01" value={form.price??""} onChange={e=>setForm({...form,price:e.target.value})}/></label></>}
+   {tab!=="formation"&&<label>Prix affiché<input value={form.price_label||""} onChange={e=>setForm({...form,price_label:e.target.value})}/></label>}
+   {tab==="site"&&<><label>Nom complet<input value={form.full_name||""} onChange={e=>setForm({...form,full_name:e.target.value})}/></label><label>Type<input value={form.category||form.typeLabel||""} onChange={e=>setForm({...form,category:e.target.value})}/></label><label>URL<input type="url" value={form.url||""} onChange={e=>setForm({...form,url:e.target.value})}/></label><label>Image (URL)<input type="url" value={form.image_url||""} onChange={e=>setForm({...form,image_url:e.target.value})}/><SiteImageUpload onUploaded={v=>setForm(x=>({...x,image_url:v}))}/></label><label>Statut<input value={form.status||""} onChange={e=>setForm({...form,status:e.target.value})}/></label><label>Accent<input value={form.accent||""} onChange={e=>setForm({...form,accent:e.target.value})}/></label></>}
+   <label className="wide">Description<textarea value={form.description||""} onChange={e=>setForm({...form,description:e.target.value})} rows="4"/></label>
+   {tab==="formation"&&<label className="wide">Modules (un par ligne)<textarea value={(form.bullets||[]).join("\n")} onChange={e=>setForm({...form,bullets:e.target.value.split("\n").map(x=>x.trim()).filter(Boolean)})} rows="5"/></label>}
+   <label className="check"><input type="checkbox" checked={form.active!==false} onChange={e=>setForm({...form,active:e.target.checked})}/> Visible sur le site</label>
+   </div><button className="primary" type="submit"><Save size={16}/> Enregistrer</button></form>}
+  {error&&<div className="authError">{error}</div>}
+  {loading?<p className="adminEmpty">Chargement…</p>:<div className="adminList">{visible.map(item=><article className="adminItem" key={item.id}><div className="adminItemIcon">{item.icon||"✨"}</div><div className="adminItemBody"><div><span>{item.category||item.type}</span>{item.active===false&&<em>Masqué</em>}</div><h2>{item.title||item.name}</h2><p>{item.description}</p><strong>{tab==="formation"&&item.price!=null?`${Number(item.price).toFixed(2).replace(".",",")} €`:item.price_label||item.url||"—"}</strong></div><div className="adminItemButtons"><button onClick={()=>edit(item)} aria-label="Modifier"><Pencil size={16}/></button><button onClick={()=>remove(item.id)} aria-label="Supprimer"><Trash2 size={16}/></button></div></article>)}</div>}
+ </>}
+ </section></main>
+}
+
+
+function SiteImageUpload({onUploaded}){const [loading,setLoading]=useState(false),[error,setError]=useState("");async function upload(e){const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith("image/")){setError("Sélectionnez une image.");return}setLoading(true);setError("");try{const s=createClient();const ext=file.name.split(".").pop()?.toLowerCase()||"png";const path=`catalog/sites/${crypto.randomUUID()}.${ext}`;const {error:up}=await s.storage.from("nexora-media").upload(path,file,{contentType:file.type,upsert:false});if(up)throw up;const {data}=s.storage.from("nexora-media").getPublicUrl(path);onUploaded(data.publicUrl)}catch(e){setError(e.message||"Upload impossible")}finally{setLoading(false)}}return <label className="imageUpload">{loading?<><LoaderCircle className="spin" size={14}/> Téléversement…</>:<><Upload size={14}/> Importer une image<input type="file" accept="image/*" onChange={upload}/></>}{error&&<small>{error}</small>}</label>}
