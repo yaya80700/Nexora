@@ -1,1 +1,0 @@
-Nexora application root. Vercel Root Directory must be the repository root (.)
