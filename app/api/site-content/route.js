@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";import {getSiteContent} from "../../../lib/nexora/siteContent";export async function GET(req){const page=new URL(req.url).searchParams.get("page")||"home";return NextResponse.json(await getSiteContent(page));}
