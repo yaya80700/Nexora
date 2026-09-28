@@ -9,8 +9,9 @@ import AdminDemandes from "./demandes/page";
 import AdminControlNav from "./AdminControlNav";
 import DashboardPanel from "./DashboardPanel";
 import AcademyAdmin from "./AcademyAdmin";
+import PaymentAdmin from "./paiements/page";
 
-const empty={type:"formation",slug:"",title:"",name:"",full_name:"",category:"",level:"",icon:"✨",description:"",bullets:[],price:"",price_label:"",status:"",accent:"",url:"",image_url:"",active:true,sort_order:0};
+const empty={type:"formation",slug:"",title:"",name:"",full_name:"",category:"",level:"",icon:"✨",description:"",bullets:[],price:"",price_label:"",status:"",accent:"",url:"",image_url:"",purchase_mode:"contact",active:true,sort_order:0};
 const emptySubscription={slug:"",name:"",description:"",price:"",price_label:"",billing_period:"mois",features:[],highlighted:false,active:true,sort_order:0};
 const labels={formation:"Formations",service:"Services",site:"Sites",subscription:"Abonnements"};
 function ProjectsAdmin(){
@@ -43,10 +44,10 @@ export default function Admin(){
  return <main className="adminPage"><header className="adminTop"><div><span className="sectionTag">NEXORA ADMIN</span><h1>Panneau de <span>contrôle.</span></h1><p>Gérez tout votre site depuis un seul espace.</p></div><div className="adminActions"><Link href="/" className="secondary">Voir le site</Link><button className="secondary" onClick={logout}><LogOut size={15}/> Déconnexion</button></div></header>
  <section className="adminWrap">
   <AdminControlNav active={panel} onPanelChange={setPanel} />
-  {panel==="dashboard"?<DashboardPanel />:panel==="editor"?<Editor />:panel==="projects"?<ProjectsAdmin />:panel==="users"?<AdminUsers embedded />:panel==="requests"?<AdminDemandes embedded />:panel==="academy"?<AcademyAdmin />:<>
+  {panel==="dashboard"?<DashboardPanel />:panel==="editor"?<Editor />:panel==="projects"?<ProjectsAdmin />:panel==="users"?<AdminUsers embedded />:panel==="requests"?<AdminDemandes embedded />:panel==="academy"?<AcademyAdmin />:panel==="payments"?<PaymentAdmin embedded />:<>
   <div className="adminTabs">{[["formation",GraduationCap],["service",Wrench],["site",Globe2],["subscription",Sparkles]].map(([key,Icon])=><button key={key} className={tab===key?"active":""} onClick={()=>{setTab(key);setEditing(null);setAdding(false);setError("");setForm(key==="subscription"?emptySubscription:{...empty,type:key})}}><Icon size={16}/>{labels[key]}</button>)}</div>
   <div className="adminHeader"><div><ShieldCheck size={17}/><strong>{labels[tab]}</strong><span>{visible.length} élément(s){tab==="subscription"?" · maximum 5":""}</span></div><button className="primary" onClick={add}><Plus size={16}/> Ajouter</button></div>
-  {(editing!==null || adding) && <form className="adminForm" onSubmit={save}><div className="adminFormTitle"><strong>{editing?"Modifier":"Ajouter"} — {labels[tab]}</strong><button type="button" onClick={()=>{setEditing(null);setAdding(false);setForm({...empty,type:tab})}}><X size={17}/></button></div>
+  {(editing!==null || adding) && <form className="adminForm" onSubmit={save}><div className="adminFormTitle"><strong>{editing?"Modifier":"Ajouter"} — {labels[tab]}</strong><button type="button" onClick={()=>{setEditing(null);setAdding(false);setForm({...empty,type:tab,purchase_mode:"contact"})}}><X size={17}/></button></div>
    {tab==="subscription"?<div className="adminFields">
     <label>Slug<input value={form.slug||""} onChange={e=>setForm({...form,slug:e.target.value})} required/></label>
     <label>Nom de l'abonnement<input value={form.name||""} onChange={e=>setForm({...form,name:e.target.value})} required/></label>
@@ -61,6 +62,7 @@ export default function Admin(){
    </div>:<div className="adminFields"><label>Slug<input value={form.slug||""} onChange={e=>setForm({...form,slug:e.target.value})} required/></label><label>{tab==="site"?"Nom":"Titre"}<input value={(tab==="site"?form.name:form.title)||""} onChange={e=>setForm({...form,[tab==="site"?"name":"title"]:e.target.value})} required/></label><label>Icône<input value={form.icon||""} onChange={e=>setForm({...form,icon:e.target.value})}/></label><label>Ordre<input type="number" value={form.sort_order??0} onChange={e=>setForm({...form,sort_order:e.target.value})}/></label>
    {tab==="formation"&&<><label>Catégorie<input value={form.category||""} onChange={e=>setForm({...form,category:e.target.value})}/></label><label>Niveau<input value={form.level||""} onChange={e=>setForm({...form,level:e.target.value})}/></label><label>Prix (€)<input type="number" step="0.01" value={form.price??""} onChange={e=>setForm({...form,price:e.target.value})}/></label></>}
    {tab!=="formation"&&<label>Prix affiché<input value={form.price_label||""} onChange={e=>setForm({...form,price_label:e.target.value})}/></label>}
+   {(tab==="formation"||tab==="service")&&<label>Mode de vente<select value={form.purchase_mode||"contact"} onChange={e=>setForm({...form,purchase_mode:e.target.value})}><option value="contact">Nous contacter uniquement</option><option value="cart">Ajouter au panier uniquement</option><option value="both">Nous contacter + Ajouter au panier</option></select></label>}
    {tab==="service" && (<>
     <label>Image du service (URL)<input type="url" value={form.image_url||""} onChange={e=>setForm({...form,image_url:e.target.value})}/></label>
     <ServiceImageUpload onUploaded={v=>setForm(x=>({...x,image_url:v}))}/>

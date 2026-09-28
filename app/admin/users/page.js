@@ -7,7 +7,7 @@ import AdminControlNav from "../AdminControlNav";
 
 const ACCESS=[
  ["users_read","Voir les utilisateurs"],["users_manage","Gérer les utilisateurs"],["staff_manage","Gérer le staff et les rôles"],["academy_manage","Gérer Nexora Academy"],
- ["catalog","Gérer le catalogue"],["editor","Modifier l'éditeur du site"],["site_pages","Gérer les pages"],["requests","Voir les demandes clients"],["requests_manage","Gérer et répondre aux demandes"]
+ ["catalog","Gérer le catalogue"],["store_manage","Gérer le panier et les paiements"],["editor","Modifier l'éditeur du site"],["site_pages","Gérer les pages"],["requests","Voir les demandes clients"],["requests_manage","Gérer et répondre aux demandes"]
 ];
 const tones=["violet","blue","green","orange","pink","cyan"];
 const emptyRole={name:"",description:"",permissions:[]};

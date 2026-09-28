@@ -53,7 +53,7 @@ export async function PATCH(request) {
   if (response) return response;
   const body = await request.json();
   if (!body.id) return NextResponse.json({error:"ID obligatoire"},{status:400});
-  const allowed = ["type","slug","title","name","full_name","category","level","icon","description","bullets","price","price_label","status","accent","url","image_url","active","sort_order"];
+  const allowed = ["type","slug","title","name","full_name","category","level","icon","description","bullets","price","price_label","status","accent","url","image_url","purchase_mode","active","sort_order"];
   const payload = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key)));
   if (payload.price === "") payload.price = null;
   if (payload.price != null) payload.price = Number(payload.price);

@@ -419,7 +419,7 @@ html,body{overflow-x:hidden}
 .paymentMethodIcon{font-size:24px;min-width:38px}
 .paymentMethodText{flex:1}
 .paymentMethodText p,.orderAdminRow p{margin:5px 0 0;color:var(--muted,#9aa0b5);font-size:13px}
-.paymentMethodActions{display:flex;gap:7px}
+.paymentMethodActions{display:flex;gap:7px;align-items:center}.paymentMethodActions select{border:1px solid rgba(255,255,255,.12);background:#111321;color:inherit;border-radius:10px;padding:9px 11px;min-width:190px}
 .orderAdminRow>div:last-child{display:grid;gap:7px;text-align:right;min-width:150px}
 .orderAdminRow select{border:1px solid rgba(255,255,255,.12);background:#111321;color:inherit;border-radius:9px;padding:8px}
 @media(max-width:640px){

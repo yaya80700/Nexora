@@ -14,10 +14,11 @@ export async function POST(request){
   const {data:method}=await supabase.from("payment_methods").select("id,name,mode,payment_url,instructions").eq("id",body.payment_method_id).eq("active",true).maybeSingle();
   if(!method) return NextResponse.json({error:"Moyen de paiement indisponible."},{status:400});
   const types=[...new Set(items.map(x=>x.type))];
-  const {data:catalog,error:catError}=await supabase.from("catalog_items").select("type,slug,title,name,price,price_label,active").in("type",types).eq("active",true);
+  const {data:catalog,error:catError}=await supabase.from("catalog_items").select("type,slug,title,name,price,price_label,active,purchase_mode").in("type",types).eq("active",true);
   if(catError) return NextResponse.json({error:catError.message},{status:500});
   const priced=items.map(x=>{const p=(catalog||[]).find(y=>y.type===x.type&&y.slug===x.slug);return p?{...x,title:p.title||p.name||p.slug,unit_price:p.price==null?null:Number(p.price)}:null;});
   if(priced.some(x=>!x)) return NextResponse.json({error:"Un article du panier n'est plus disponible."},{status:400});
+  if(priced.some(x=>!['cart','both'].includes((catalog||[]).find(y=>y.type===x.type&&y.slug===x.slug)?.purchase_mode||"contact"))) return NextResponse.json({error:"Un article du panier n'est pas disponible à l'achat en ligne."},{status:400});
   if(priced.some(x=>x.unit_price==null)) return NextResponse.json({error:"Un article du panier n'a pas de prix fixe et doit être traité sur devis."},{status:400});
   const total=priced.reduce((s,x)=>s+x.unit_price*x.quantity,0);
   const {data:order,error}=await supabase.from("orders").insert({user_id:user.id,payment_method_id:method.id,total,notes:body.notes?String(body.notes).slice(0,1000):null}).select().single();
