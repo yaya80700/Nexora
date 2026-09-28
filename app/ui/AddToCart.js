@@ -1,4 +1,0 @@
-"use client";
-import {ShoppingCart,Check} from "lucide-react";
-import {useEffect,useState} from "react";
-export default function AddToCart({type,slug,title,price,priceLabel}){const [added,setAdded]=useState(false);function add(){if(price==null)return;const key="nexora_cart";let cart=[];try{cart=JSON.parse(localStorage.getItem(key)||"[]")}catch{};const i=cart.findIndex(x=>x.type===type&&x.slug===slug);if(i>=0)cart[i].quantity=Math.min(99,(cart[i].quantity||1)+1);else cart.push({type,slug,title,price:Number(price),priceLabel,quantity:1});localStorage.setItem(key,JSON.stringify(cart));window.dispatchEvent(new Event("nexora-cart-updated"));setAdded(true);setTimeout(()=>setAdded(false),1600)}return <button type="button" className="smallBtn cartAddButton" onClick={add} disabled={price==null}>{added?<><Check size={15}/> Ajouté</>:<><ShoppingCart size={15}/> Ajouter au panier</>}</button>}
